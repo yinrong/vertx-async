@@ -517,7 +517,7 @@ public final class AsyncFlowsTest {
     public void untilExecutesEmpty(final TestContext context) {
         final AtomicInteger counter = new AtomicInteger();
         final Async async = context.async();
-        instance.until(() -> false, t -> {
+        instance.until(() -> true, t -> {
             counter.incrementAndGet();
             t.handle(DefaultAsyncResult.succeed());
         }, e -> {
@@ -532,7 +532,7 @@ public final class AsyncFlowsTest {
     public void untilExecutesMany(final TestContext context) {
         final AtomicInteger counter = new AtomicInteger();
         final Async async = context.async();
-        instance.until(() -> counter.incrementAndGet() < 100, t -> {
+        instance.until(() -> counter.incrementAndGet() >= 100, t -> {
             t.handle(DefaultAsyncResult.succeed());
         }, e -> {
             context.assertTrue(e.succeeded());
@@ -546,7 +546,7 @@ public final class AsyncFlowsTest {
     public void untilExecutesAndFails(final TestContext context) {
         final AtomicInteger counter = new AtomicInteger();
         final Async async = context.async();
-        instance.until(() -> counter.incrementAndGet() < 2, t -> {
+        instance.until(() -> counter.incrementAndGet() >= 2, t -> {
             t.handle(DefaultAsyncResult.fail(new IllegalAccessException()));
         }, e -> {
             context.assertFalse(e.succeeded());
@@ -561,7 +561,7 @@ public final class AsyncFlowsTest {
     public void untilExecutesUnhandledException(final TestContext context) {
         final AtomicInteger counter = new AtomicInteger();
         final Async async = context.async();
-        instance.until(() -> counter.incrementAndGet() < 2, t -> {
+        instance.until(() -> counter.incrementAndGet() >= 2, t -> {
             throw new IllegalAccessError();
         }, e -> {
             context.assertFalse(e.succeeded());

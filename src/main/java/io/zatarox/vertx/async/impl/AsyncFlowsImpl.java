@@ -22,6 +22,8 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.zatarox.vertx.async.api.AsyncFlows;
 import io.zatarox.vertx.async.api.BiHandler;
+
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -126,6 +128,9 @@ public final class AsyncFlowsImpl implements AsyncFlows {
     @Override
     public <T> void parallel(final List<Handler<Handler<AsyncResult<T>>>> tasks, final Handler<AsyncResult<List<T>>> handler) {
         final List<T> results = new ArrayList<>(tasks.size());
+        for (int i = 0; i < tasks.size(); ++i) {
+            results.add(null);
+        }
         if (tasks.isEmpty()) {
             handler.handle(DefaultAsyncResult.succeed(results));
         } else {
@@ -144,7 +149,7 @@ public final class AsyncFlowsImpl implements AsyncFlows {
                                     handler.handle(DefaultAsyncResult.fail(result));
                                 }
                             } else {
-                                results.add(pos, result.result());
+                                results.set(pos, result.result());
                                 if (counter.decrementAndGet() == 0 && !stop.get()) {
                                     handler.handle(DefaultAsyncResult.succeed(results));
                                 }
@@ -245,9 +250,9 @@ public final class AsyncFlowsImpl implements AsyncFlows {
                     consumer.handle(e1 -> {
                         if (e1.succeeded()) {
                             if (tester.getAsBoolean()) {
-                                context.runOnContext(this);
-                            } else {
                                 handler.handle(DefaultAsyncResult.succeed());
+                            } else {
+                                context.runOnContext(this);
                             }
                         } else {
                             handler.handle(DefaultAsyncResult.fail(e1));
