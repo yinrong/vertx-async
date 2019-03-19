@@ -297,8 +297,12 @@ public final class AsyncFlowsImpl implements AsyncFlows {
 
     @Override
     public <T> void times(final int counter, final BiHandler<Integer, Handler<AsyncResult<T>>> consumer, final Handler<AsyncResult<List<T>>> handler) {
-        final List<T> mapped = new ArrayList<>(counter);
+        final List<T> mapped = new ArrayList<T>(counter);
+        for (int i = 0; i < counter; ++i) {
+            mapped.add(null);
+        }
         if (counter < 1) {
+
             handler.handle(DefaultAsyncResult.succeed(mapped));
         } else {
             final AtomicBoolean stop = new AtomicBoolean(false);
@@ -315,7 +319,7 @@ public final class AsyncFlowsImpl implements AsyncFlows {
                                     handler.handle(DefaultAsyncResult.fail(result));
                                 }
                             } else {
-                                mapped.add(pos, result.result());
+                                mapped.set(pos, result.result());
                                 if (execution.decrementAndGet() < 1 && !stop.get()) {
                                     handler.handle(DefaultAsyncResult.succeed(mapped));
                                 }
